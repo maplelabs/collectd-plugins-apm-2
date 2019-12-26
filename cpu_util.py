@@ -72,8 +72,7 @@ class CpuUtil(object):
     def add_cpu_data(self):
         """Returns dictionary with values of total,per core CPU utilization
            and no. of cores in low, medium and high range."""
-        # dict_cpu_util = {CPU_UTIL: psutil.cpu_percent(
-            interval=None, percpu=False)}
+        # dict_cpu_util = {CPU_UTIL: psutil.cpu_percent(interval=None, percpu=False)}
         scpu = psutil.cpu_times_percent(interval=None, percpu=False)
         dict_cpu_util = {}
         # dict_cpu_util = {'CpuMisc': scpu.nice+scpu.irq+scpu.guest+scpu.guest_nice+scpu.softirq, 'CpuUser': scpu.user, 'CpuSystem' : scpu.system, 'CpuIdle': scpu.idle, 'CpuIoWait':scpu.iowait ,'CPUUtil':scpu.user+scpu.system, 'CpuSteal': scpu.steal}
