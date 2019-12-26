@@ -79,7 +79,7 @@ class ElasticsearchStats(object):
             return False
 
     def check_master(self, node_id):
-        es_url = "{}://{}:{}/_cat/master".format(str(self.es_protocol), str(self.host), str(self.port))
+        es_url = "{0}://{1}:{2}/_cat/master".format(str(self.es_protocol), str(self.host), str(self.port))
         response = requests.get(es_url, verify=False)
         for line in response:
             if line.split()[0] == node_id:
@@ -2057,7 +2057,7 @@ class ElasticsearchStats(object):
     def read(self):
         try:
             self.pollCounter += 1
-            connection = "{}://{}:{}".format(str(self.es_protocol), str(self.host), str(self.port))
+            connection = "{0}://{1}:{2}".format(str(self.es_protocol), str(self.host), str(self.port))
             self.es = ESearch([connection], verify_certs=False, connection_class=RequestsHttpConnection, timeout=90, http_auth=(self.es_username, self.es_password))
 
             if self.ping_server():
