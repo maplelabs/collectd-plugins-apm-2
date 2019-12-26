@@ -75,6 +75,7 @@ class CpuUtil(object):
         # dict_cpu_util = {CPU_UTIL: psutil.cpu_percent(
             interval=None, percpu=False)}
         scpu = psutil.cpu_times_percent(interval=None, percpu=False)
+        dict_cpu_util = {}
         # dict_cpu_util = {'CpuMisc': scpu.nice+scpu.irq+scpu.guest+scpu.guest_nice+scpu.softirq, 'CpuUser': scpu.user, 'CpuSystem' : scpu.system, 'CpuIdle': scpu.idle, 'CpuIoWait':scpu.iowait ,'CPUUtil':scpu.user+scpu.system, 'CpuSteal': scpu.steal}
         misc = 0
         if hasattr(scpu, 'nice'):
