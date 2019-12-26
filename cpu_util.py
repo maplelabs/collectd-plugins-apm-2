@@ -72,13 +72,34 @@ class CpuUtil(object):
     def add_cpu_data(self):
         """Returns dictionary with values of total,per core CPU utilization
            and no. of cores in low, medium and high range."""
-        dict_cpu_util = {CPU_UTIL: psutil.cpu_percent(
+        # dict_cpu_util = {CPU_UTIL: psutil.cpu_percent(
             interval=None, percpu=False)}
         scpu = psutil.cpu_times_percent(interval=None, percpu=False)
-        if sys.version_info <(2,7):
-            dict_cpu_util = {'CpuMisc': scpu.nice+scpu.irq+scpu.guest+scpu.softirq, 'CpuUser': scpu.user, 'CpuSystem' : scpu.system, 'CpuIdle': scpu.idle, 'CpuIoWait':scpu.iowait ,'CPUUtil':scpu.user+scpu.system, 'CpuSteal': scpu.steal}
-        else:
-            dict_cpu_util = {'CpuMisc': scpu.nice+scpu.irq+scpu.guest+scpu.guest_nice+scpu.softirq, 'CpuUser': scpu.user, 'CpuSystem' : scpu.system, 'CpuIdle': scpu.idle, 'CpuIoWait':scpu.iowait ,'CPUUtil':scpu.user+scpu.system, 'CpuSteal': scpu.steal}
+        # dict_cpu_util = {'CpuMisc': scpu.nice+scpu.irq+scpu.guest+scpu.guest_nice+scpu.softirq, 'CpuUser': scpu.user, 'CpuSystem' : scpu.system, 'CpuIdle': scpu.idle, 'CpuIoWait':scpu.iowait ,'CPUUtil':scpu.user+scpu.system, 'CpuSteal': scpu.steal}
+        misc = 0
+        if hasattr(scpu, 'nice'):
+            misc = misc + scpu.nice
+        if hasattr(scpu, 'guest'):
+            misc = misc + scpu.irq
+        if hasattr(scpu, 'guest_nice'):
+            misc = misc + scpu.guest_nice
+        if hasattr(scpu, 'softirq'):
+            misc = misc + scpu.softirq
+        if hasattr(scpu, 'user'):
+            dict_cpu_util['CpuUser'] = scpu.user
+        if hasattr(scpu, 'system'):
+            dict_cpu_util['CpuSystem'] = scpu.system
+        if hasattr(scpu, 'idle'):
+            dict_cpu_util['CpuIdle'] = scpu.idle
+        if hasattr(scpu, 'iowait'):
+            dict_cpu_util['CpuIoWait'] = scpu.iowait
+        if hasattr(scpu, 'system') and hasattr(scpu, 'user'):
+            dict_cpu_util['CPUUtil'] = scpu.user + scpu.system
+        if hasattr(scpu, 'steal'):
+            dict_cpu_util['CpuSteal'] = scpu.steal
+
+        if misc != 0:
+            dict_cpu_util['CpuMisc'] = misc
 
         per_cpu_util = psutil.cpu_percent(interval=None, percpu=True)
         no_of_cores = len(per_cpu_util)
