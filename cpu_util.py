@@ -55,11 +55,19 @@ class CpuUtil(object):
                         "Plugin cpu_static: LLC Statistics is hidden from Virtual machines.")
                     return 0
                 elif "LLC-loads" in line:
-                    LLCLoads = float(line.strip(" ").split(" ")[0].replace(",", ""))
-                    LLC = True
+                    try:
+                        LLCLoads = float(line.strip(" ").split(" ")[0].replace(",", ""))
+                        LLC = True
+                    except ValueError:
+                        collectd.info("Plugin cpu_util: LLCLoads value not found/not counted")
+
                 elif "LLC-load-misses" in line:
-                    LLCLoadMisses = float(line.strip(" ").split(" ")[0].replace(",", ""))
-                    LLC = True
+                    try:
+                       LLCLoadMisses = float(line.strip(" ").split(" ")[0].replace(",", ""))
+                       LLC = True
+                    except ValueError:
+                        collectd.info("Plugin cpu_util: LLCLoadMisses value not found/not counted")
+
                 index += 1
             else:
                 index += 1

@@ -95,6 +95,7 @@ class CpuStatic(object):
 
             index += 1
 
+        model_name = ''
         if keyword_processor_found and keyword_physical_id_found and keyword_core_id_found:
             if (total_cores * total_physical_cpus) * 2 == total_logical_cpus:
                 hyperthreading = 1
