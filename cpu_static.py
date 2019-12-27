@@ -99,7 +99,7 @@ class CpuStatic(object):
         if keyword_processor_found and keyword_physical_id_found and keyword_core_id_found:
             if (total_cores * total_physical_cpus) * 2 == total_logical_cpus:
                 hyperthreading = 1
-            model_name = ",".join(model_list)
+        model_name = ",".join(model_list)
 
         dict_cpu_static[CPU_TYPE] = model_name
         if count_freq != 0:
