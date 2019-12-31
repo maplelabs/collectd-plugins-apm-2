@@ -78,9 +78,9 @@ class TopStats(object):
         process, err = utils.get_cmd_output(cmnd)
         result = []
         process_order = 1
-        while True:
+        for line in process:
             top_stats_res = {}
-            line = process.stdout.readline()
+            # line = process.stdout.readline()
             if line != b'':
                 response = line.split(' ')
                 
