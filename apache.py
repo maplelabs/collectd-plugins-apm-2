@@ -78,7 +78,9 @@ class ApachePerf:
             if data:
                 result = dict([(key_map[str((i.split(":", 1)[0]).strip())], str((i.split(":", 1)[1]).strip()))
                                for i in data if (i.split(":", 1)[0]).strip() in key_map.keys()])
-                serverDetails = subprocess.check_output(["httpd","-v"]).split()
+                out, err = get_cmd_output("httpd -v")
+                serverDetails = out.split()
+
             else:
                 collectd.info("Couldn't get the data")
                 return

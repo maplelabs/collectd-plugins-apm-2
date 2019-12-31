@@ -19,6 +19,9 @@ import sys
 import utils
 from constants import *
 
+PlatformOS = platform.dist()[0].lower()
+PlatformVersion = float(platform.dist()[1])
+
 
 class CpuUtil(object):
     """Plugin object will be created only once and collects cpu statistics info every interval."""
@@ -124,7 +127,10 @@ class CpuUtil(object):
             elif MEDIUM_RANGE_END < per_cpu_util[i - 1] <= HIGH_RANGE_END:
                 dict_cpu_util[NUM_HIGH_ACTIVE] += 1
 
-        dict_cpu_util["LLCMissRate"] = self.get_LLC_stats()
+        if PlatformOS in ['centos', 'redhat'] and PlatformVersion < 7:
+            dict_cpu_util["LLCMissRate"] = 0
+        else:
+            dict_cpu_util["LLCMissRate"] = self.get_LLC_stats()
         return dict_cpu_util
 
     def add_common_params(self, dict_cpu_util):

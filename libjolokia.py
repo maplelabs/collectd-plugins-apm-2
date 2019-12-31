@@ -7,6 +7,7 @@
 """Class to handle jolokia related operations"""
 
 import os
+import sys
 import re
 import time
 import subprocess
@@ -33,11 +34,17 @@ def synchronized(func):
 def get_cmd_output(cmd, shell_value=True, stdout_value=subprocess.PIPE,
                    stderr_value=subprocess.PIPE):
     """Returns subprocess output and return code of cmd passed in argument."""
-    call = subprocess.Popen(cmd, shell=shell_value,
+    if sys.version_info < (2, 7):
+        inp, out, stderr = os.popen3(cmd)
+        status = out.read()
+        err = stderr.read()
+        returncode = 0 if err else -1
+    else:
+        call = subprocess.Popen(cmd, shell=shell_value,
                             stdout=stdout_value, stderr=stderr_value)
-    call.wait()
-    status, err = call.communicate()
-    returncode = call.returncode
+        call.wait()
+        status, err = call.communicate()
+        returncode = call.returncode
     return status, err, returncode
 
 

@@ -209,8 +209,7 @@ class JmxStat(object):
     def get_zookeeper_info(self):
         "Getting info about zookeeper type whether it is a standalone or cluster"
         try:
-            p1 = subprocess.Popen("echo srvr | nc localhost 2181", shell=True, stdout=subprocess.PIPE)
-            output = p1.communicate()[0]
+            output, err = utils.get_cmd_output("echo srvr | nc localhost 2181", shell_value=True, stdout_value=subprocess.PIPE)
             if output:
                 output_list = output.splitlines()
             for line in output_list:
@@ -225,8 +224,7 @@ class JmxStat(object):
     def get_zookeeper_id(self):
         "If zookeeper type is a cluster, get its own id and set its appropriate"
         try:
-            p2 = subprocess.Popen("cat /opt/kafka/data/zookeeper/myid", shell=True, stdout=subprocess.PIPE)
-            output = p2.communicate()[0]
+            output, err = utils.get_cmd_output("cat /opt/kafka/data/zookeeper/myid", shell_value=True, stdout_value=subprocess.PIPE)
             if output:
                 return output
         except Exception as e:

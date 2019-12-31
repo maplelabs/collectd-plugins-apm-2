@@ -162,7 +162,8 @@ class RedisStats:
                     collectd.error("No Key details found")
                     stats_dict["totKeys"] = 0
                     stats_dict["totalDatabases"] = 0
-                outlis = subprocess.check_output(["redis-cli", "--intrinsic-latency", "1"]).split()
+                out, err = get_cmd_output("redis-cli --intrinsic-latency 1")
+                outlis = out.split()
                 if len(outlis) > 0:
                     try:
                         stats_dict["latency"] = float(outlis[-16])

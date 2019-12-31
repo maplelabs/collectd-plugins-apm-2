@@ -75,7 +75,7 @@ class TopStats(object):
         elif self.utilize_type == "CPU" or self.utilize_type == "MEM":
             cmnd = "top -b -o +%" + self.utilize_type + " -n 1 | head -" + str(head_value) + " | sed -n '8,20p' | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
             self.process = "*"
-        process = subprocess.Popen(cmnd, shell=True, stdout=subprocess.PIPE)
+        process, err = utils.get_cmd_output(cmnd)
         result = []
         process_order = 1
         while True:

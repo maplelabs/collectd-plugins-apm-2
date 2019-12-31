@@ -328,21 +328,15 @@ class JmxStat(object):
         """
         grp_list = []
         with open(os.devnull, 'w') as devnull:
-            p1 = subprocess.Popen(
-                ["sudo", "/opt/kafka/kafka_2.12-1.0.0/bin/kafka-consumer-groups.sh", "--list", "--bootstrap-server",
-                 self.listenerip+':'+self.port], stdout=subprocess.PIPE, stderr=devnull)
-        p1.wait()
-        consumerGrp = p1.communicate()[0]
+            cmd = "sudo /opt/kafka/kafka_2.12-1.0.0/bin/kafka-consumer-groups.sh --list --bootstrap-server {0}:{1}".format(self.listernerip, self.port)
+            consumerGrp, err = utils.get_cmd_output(cmd, stdout_value=subprocess.PIPE, stderr_value=devnull)
         if consumerGrp:
             consumerGrp_list = consumerGrp.splitlines()
             for consGrp in consumerGrp_list:
                 with open(os.devnull, 'w') as devnull:
-                    p2 = subprocess.Popen(
-                        ["sudo", "/opt/kafka/kafka_2.12-1.0.0/bin/kafka-consumer-groups.sh", "--describe", "--group",
-                         consGrp, "--bootstrap-server", self.listenerip+':'+self.port], stdout=subprocess.PIPE, stderr=devnull)
-                    p2.wait()
+                    cmd = "sudo /opt/kafka/kafka_2.12-1.0.0/bin/kafka-consumer-groups.sh --describe --group {0} --bootstrap-server {0}:{1}".format(consGrp, self.listernerip, self.port)
+                    grp_detail, err = utils.get_cmd_output(cmd, stdout_value=subprocess.PIPE, stderr_value=devnull)
                     dict_grp = {}
-                    grp_detail = p2.communicate()[0]
                     if grp_detail:
                         grp_detail_list = grp_detail.splitlines()
                         for group in grp_detail_list[2:]:

@@ -180,8 +180,8 @@ class haproxyStats(object):
                 key_mapping = []
 
                 cmnd = "echo 'show stat' | nc -U /var/lib/haproxy/stats"
-                process = subprocess.Popen(cmnd, shell=True, stdout=subprocess.PIPE)
-                lines = process.stdout.readlines()
+                process, err = utils.get_cmd_output(cmnd, shell_value=True, stdout_value=subprocess.PIPE)
+                lines = process.splitlines()
 
                 self.get_keys(key_mapping, lines)
                 self.format_stats(dict_stats, lines)
@@ -191,8 +191,8 @@ class haproxyStats(object):
 
             if doc == "haproxyStats":
                 cmnd = "echo 'show info' | nc -U /var/lib/haproxy/stats"
-                process = subprocess.Popen(cmnd, shell=True, stdout=subprocess.PIPE)
-                lines = process.stdout.readlines()
+                process, err = utils.get_cmd_output(cmnd, shell_value=True, stdout_value=subprocess.PIPE)
+                lines = process.splitlines()
 
                 self.get_haproxy_data(lines, haproxy_data)
 

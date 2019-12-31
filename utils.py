@@ -9,11 +9,15 @@
 
 
 import subprocess
+import sys
+import os
 import write_json
 import collectd
 import socket
+import sys
 from constants import *
 
+PY_VERSION = sys.version_info
 
 def gethostname():
     hostname = HOSTNAMEFAILURE
@@ -67,9 +71,13 @@ def dispatch(data_dict):
 def get_cmd_output(cmd, shell_value=True, stdout_value=subprocess.PIPE,
                    stderr_value=subprocess.PIPE):
     """Returns subprocess output of command passed in argument."""
-    call = subprocess.Popen(cmd, shell=shell_value,
+    if PY_VERSION < (2,7):
+        inp, out, err = os.popen3(cmd)
+        return out.read(), err.read()
+    else:
+        call = subprocess.Popen(cmd, shell=shell_value,
                             stdout=stdout_value, stderr=stderr_value)
-    return call.communicate()
+        return call.communicate()
 
 
 def get_rate(key, curr_data, prev_data):

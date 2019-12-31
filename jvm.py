@@ -9,6 +9,7 @@ Collectd Python plugin to get JVM stats [pid, classes, threads, cpu usage, ram u
 heap size, heap usage, Process state]
 """
 
+import sys
 import subprocess
 import collectd
 from constants import *
@@ -23,6 +24,7 @@ class JVM(object):
         """Initializes interval and previous dictionary variable."""
         self.interval = 0
         self.process = None
+        self.py_version = sys.version_info
 
     def read_config(self, cfg):
         """Initializes variables from conf files."""
@@ -34,12 +36,20 @@ class JVM(object):
 
     def get_ramusage(self, pid):
         """Returns RAM usage in MB"""
-        call = subprocess.Popen("ps aux | grep '%s'" % pid, shell=True,
+        if self.py_version < (2,7):
+            cmd = "ps aux | grep '{0}'".format(pid)
+            (inp, out, stderr) = os.popen3(cmd)
+            ramusage = out.read()
+            if stderr.read():
+                collectd.info("Error: %s" % stderr.read())
+                return -1
+        else:
+            call = subprocess.Popen("ps aux | grep '%s'" % pid, shell=True,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (ramusage, err) = call.communicate()
-        if err:
-            collectd.debug("Error: %s" % err)
-            return -1
+            (ramusage, err) = call.communicate()
+            if err:
+                collectd.debug("Error: %s" % err)
+                return -1
         usage = ramusage.split("\n")
         ramusage = -1
         for ram in usage:
@@ -52,12 +62,20 @@ class JVM(object):
 
     def get_cpuusage(self, pid):
         """Returns cpu utilization, CLK_TCK, utime, and stime"""
-        call = subprocess.Popen("ps aux | grep %s" % pid, shell=True,
+        if self.py_version < (2,7):
+            cmd = "ps aux | grep {0}".format(pid)
+            (inp, out, stderr) = os.popen3(cmd)
+            cpuusage = out.read()
+            if stderr.read():
+                collectd.info("Error: %s" % stderr.read())
+                return -1, -1, -1, -1
+        else:
+            call = subprocess.Popen("ps aux | grep %s" % pid, shell=True,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (cpuusage, err) = call.communicate()
-        if err:
-            collectd.debug("Error: %s" % err)
-            return -1, -1, -1, -1
+            (cpuusage, err) = call.communicate()
+            if err:
+                collectd.debug("Error: %s" % err)
+                return -1, -1, -1, -1
         usage = cpuusage.split("\n")
         for cpu in usage:
             if cpu is not "":
@@ -65,12 +83,21 @@ class JVM(object):
                 if cpu[1] == pid:
                     break
 
-        call = subprocess.Popen("getconf -a | grep CLK_TCK", shell=True,
+        if self.py_version < (2,7):
+            cmd = "getconf -a | grep CLK_TCK"
+            (inp, out, stderr) = os.popen3(cmd)
+            clk_tick = out.read()
+            if stderr.read():
+                collectd.info("Error: %s" % stderr.read())
+                return -1, -1, -1, -1
+        else:
+            call = subprocess.Popen("getconf -a | grep CLK_TCK", shell=True,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (clk_tick, err) = call.communicate()
-        if err:
-            collectd.debug("Error: %s" % err)
-            return -1, -1, -1, -1
+            (clk_tick, err) = call.communicate()
+            if err:
+                collectd.debug("Error: %s" % err)
+                return -1, -1, -1, -1
+
         clk_tick = clk_tick.split()
         try:
             fileobj = open('/proc/%d/stat' % (int(pid)))
@@ -92,12 +119,22 @@ class JVM(object):
     def get_pid(self, process_name):
         """Returns pid for JVM process"""
 	collectd.info("jvm: getting pids")
-        call = subprocess.Popen("sudo jcmd | grep -E '%s'|grep -v JCmd " % (
-            process_name), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (pids, err) = call.communicate()
-        if err:
-            collectd.info("jvm Error: %s" % err)
-            return None
+        if sys.version_info < (2,7):
+           cmd = "jcmd | grep -E '{0}' |grep -v JCmd ".format(process_name)
+           (inp, out, stderr) = os.popen3(cmd)
+           pids = out.read()
+           collectd.info("pids: %s" % pids)
+           if stderr.read():
+               collectd.info("jvm Error: %s" % stderr.read())
+               return None
+        else:
+            call = subprocess.Popen("sudo jcmd | grep -E '%s'|grep -v JCmd " % (
+                process_name), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            (pids, err) = call.communicate()
+            if err:
+                collectd.info("jvm Error: %s" % err)
+                return None
+
         pids = pids.split("\n")
         pid_list = []
         pName_list = []
@@ -129,33 +166,57 @@ class JVM(object):
                 break
 
         numof_classloaded = "%s %s" % ('jstat -class', pid)
-        call = subprocess.Popen(numof_classloaded, shell=True,
+        if self.py_version < (2,7):
+            (inp, out, stderr) = os.popen3(numof_classloaded)
+            classes = out.read()
+            if stderr.read():
+                collectd.info("Error: %s" % stderr.read())
+                return
+        else:
+            call = subprocess.Popen(numof_classloaded, shell=True,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (classes, err) = call.communicate()
-        if err:
-            collectd.info("Error: %s" % err)
-            return
+            (classes, err) = call.communicate()
+            if err:
+                collectd.info("Error: %s" % err)
+                return
+
         classes = classes.split()
 
         heapsize = 'java -XX:+PrintFlagsFinal -version | grep -iE MaxHeapSize'
-        call = subprocess.Popen("%s" % heapsize, shell=True,
+        if self.py_version < (2,7):
+            (inp, out, stderr) = os.popen3(heapsize)
+            heapsize = out.read()
+            if stderr.read() and not heapsize:
+                collectd.info("Error: %s" % stderr.read())
+                return
+        else:
+            call = subprocess.Popen("%s" % heapsize, shell=True,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        (heapsize, err) = call.communicate()
+            (heapsize, err) = call.communicate()
         #heapsize = heapsize.split("\n")
         #heapsize = heapsize[0].split(":=")
         #heapsize = heapsize[1].split(" ")
         #heapsize = (float(heapsize[1])) / (1024 * 1024)
+
         heapsize = heapsize.split()
         heapsize = (float(heapsize[3])) / (1024 * 1024)
-        
-        call = subprocess.Popen("jstat -gc %s" % int(pid), shell=True,
+
+        if self.py_version < (2,7):
+            cmd = "jstat -gc {0}".format(pid)
+            (inp, out, stderr) = os.popen3(cmd)
+            heapusage = out.read()
+            if stderr.read():
+                collectd.info("Error 3: %s" % stderr.read())
+                return
+        else:
+            call = subprocess.Popen("jstat -gc %s" % int(pid), shell=True,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
-        (heapusage, err) = call.communicate()
-        if err:
-            collectd.debug("Error: Jstat does not give correct output ")
-            return
+            (heapusage, err) = call.communicate()
+            if err:
+                collectd.debug("Error: Jstat does not give correct output ")
+                return
 
         heapusage = heapusage.split("\n")
         heapusage = str(heapusage[1]).split()
