@@ -11,6 +11,7 @@
 import subprocess
 import sys
 import os
+import platform
 import write_json
 import collectd
 import socket
