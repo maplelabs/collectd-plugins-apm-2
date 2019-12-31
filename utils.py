@@ -15,6 +15,7 @@ import platform
 import write_json
 import collectd
 import socket
+import platform
 from constants import *
 
 PY_VERSION = sys.version_info
