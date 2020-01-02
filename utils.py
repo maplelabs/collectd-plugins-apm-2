@@ -19,6 +19,8 @@ import platform
 from constants import *
 
 PY_VERSION = sys.version_info
+PlatformOS = platform.dist()[0].lower()
+PlatformVersion = float(platform.dist()[1])
 
 def gethostname():
     hostname = HOSTNAMEFAILURE

@@ -17,6 +17,7 @@ import re
 
 # user imports
 import utils
+from utils import PlatformOS, PlatformVersion
 from constants import *
 
 
@@ -66,15 +67,31 @@ class TopStats(object):
         """
         #cmnd = "top -b -o +" + self.usage_parameter +" -n 1 | head -17 | sed -n '8,20p' | awk '{print $1, $2, $9, $10, $12}'"
         head_value = 7 + int(self.maximum_grep)
-        if self.utilize_type == 'process':
-            if self.process != 'None' or self.process != '*':
-                proc = '|'.join(self.process.split(','))
-                cmnd = "top -b -o +%CPU -n 1 | grep -E '" + proc + "' | head -"+ str(head_value) + " | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
-            else:
-                cmnd = "top -b -o +%CPU -n 1 | head -" + str(head_value) + " | sed -n '8,20p' | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
-        elif self.utilize_type == "CPU" or self.utilize_type == "MEM":
-            cmnd = "top -b -o +%" + self.utilize_type + " -n 1 | head -" + str(head_value) + " | sed -n '8,20p' | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
-            self.process = "*"
+        if PlatformOS in ['centos', 'redhat'] and PlatformVersion < 7:
+            if self.utilize_type == 'process':
+                if self.process != 'None' or self.process != '*':
+                    proc = '|'.join(self.process.split(','))
+                    cmnd = "top -b -n 1 | grep -E '" + proc + "' | head -"+ str(head_value) + " | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
+                else:
+                    cmnd = "top -b -n 1 | head -" + str(head_value) + " | sed -n '8,20p' | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
+            elif self.utilize_type == "CPU":
+                cmnd = "top -b -n 1 | head -" + str(head_value) + " | sed -n '8,20p' | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
+                self.process = "*"
+            elif self.utilize_type == "MEM":
+                cmnd = "top -b -a -n 1 | head -" + str(head_value) + " | sed -n '8,20p' | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
+                self.process = "*"
+
+        else:
+            if self.utilize_type == 'process':
+                if self.process != 'None' or self.process != '*':
+                    proc = '|'.join(self.process.split(','))
+                    cmnd = "top -b -o +%CPU -n 1 | grep -E '" + proc + "' | head -"+ str(head_value) + " | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
+                else:
+                    cmnd = "top -b -o +%CPU -n 1 | head -" + str(head_value) + " | sed -n '8,20p' | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
+            elif self.utilize_type == "CPU" or self.utilize_type == "MEM":
+                cmnd = "top -b -o +%" + self.utilize_type + " -n 1 | head -" + str(head_value) + " | sed -n '8,20p' | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
+                self.process = "*"
+
         process, err = utils.get_cmd_output(cmnd)
         result = []
         process_order = 1

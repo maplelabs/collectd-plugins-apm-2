@@ -17,10 +17,8 @@ import re
 import sys
 # user imports
 import utils
+from utils import PlatformOS, PlatformVersion
 from constants import *
-
-PlatformOS = platform.dist()[0].lower()
-PlatformVersion = float(platform.dist()[1])
 
 
 class CpuUtil(object):
