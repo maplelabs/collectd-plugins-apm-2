@@ -38,7 +38,7 @@ def get_cmd_output(cmd, shell_value=True, stdout_value=subprocess.PIPE,
         inp, out, stderr = os.popen3(cmd)
         status = out.read()
         err = stderr.read()
-        returncode = 0 if err else -1
+        returncode = 0
     else:
         call = subprocess.Popen(cmd, shell=shell_value,
                             stdout=stdout_value, stderr=stderr_value)

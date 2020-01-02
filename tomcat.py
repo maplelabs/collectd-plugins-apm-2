@@ -257,7 +257,7 @@ class TomcatStat(object):
                 str_attribute = 'LastGcInfo'
                 gc_values = jolokiaclient.request(type='read', mbean=str_mbean, attribute=str_attribute)
                 gc_name_no_spaces = ''.join(gc_name.split())
-                if gc_values['status'] == 200:
+                if gc_values['status'] == 200 and gc_values['value']:
                     # dict_jmx[gc_name_no_spaces+'StartTime'] = gc_values['value']['startTime']
                     # dict_jmx[gc_name_no_spaces+'EndTime'] = gc_values['value']['endTime']
                     dict_jmx['gcDuration'] = gc_values['value']['duration']
