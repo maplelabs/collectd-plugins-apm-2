@@ -328,13 +328,13 @@ class JmxStat(object):
         """
         grp_list = []
         with open(os.devnull, 'w') as devnull:
-            cmd = "sudo /opt/kafka/kafka_2.12-1.0.0/bin/kafka-consumer-groups.sh --list --bootstrap-server {0}:{1}".format(self.listernerip, self.port)
+            cmd = "sudo /opt/kafka/kafka_2.12-1.0.0/bin/kafka-consumer-groups.sh --list --bootstrap-server {0}:{1}".format(self.listenerip, self.port)
             consumerGrp, err = utils.get_cmd_output(cmd, stdout_value=subprocess.PIPE, stderr_value=devnull)
         if consumerGrp:
             consumerGrp_list = consumerGrp.splitlines()
             for consGrp in consumerGrp_list:
                 with open(os.devnull, 'w') as devnull:
-                    cmd = "sudo /opt/kafka/kafka_2.12-1.0.0/bin/kafka-consumer-groups.sh --describe --group {0} --bootstrap-server {0}:{1}".format(consGrp, self.listernerip, self.port)
+                    cmd = "sudo /opt/kafka/kafka_2.12-1.0.0/bin/kafka-consumer-groups.sh --describe --group {0} --bootstrap-server {0}:{1}".format(consGrp, self.listenerip, self.port)
                     grp_detail, err = utils.get_cmd_output(cmd, stdout_value=subprocess.PIPE, stderr_value=devnull)
                     dict_grp = {}
                     if grp_detail:
