@@ -69,7 +69,7 @@ class TopStats(object):
         head_value = 7 + int(self.maximum_grep)
         if PlatformOS in ['centos', 'redhat'] and PlatformVersion < 7:
             if self.utilize_type == 'process':
-                if self.process != 'None' or self.process != '*':
+                if self.process != 'None' and self.process != '*':
                     proc = '|'.join(self.process.split(','))
                     cmnd = "top -b -n 1 | grep -E '" + proc + "' | head -"+ str(head_value) + " | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
                 else:
@@ -83,7 +83,7 @@ class TopStats(object):
 
         else:
             if self.utilize_type == 'process':
-                if self.process != 'None' or self.process != '*':
+                if self.process != 'None' and self.process != '*':
                     proc = '|'.join(self.process.split(','))
                     cmnd = "top -b -o +%CPU -n 1 | grep -E '" + proc + "' | head -"+ str(head_value) + " | awk '{print $1, $2, $5, $6, $7, $9, $10, $12}'"
                 else:
