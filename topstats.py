@@ -41,6 +41,8 @@ class TopStats(object):
                 self.utilize_type = children.values[0]
             if children.key == "process":
                 self.process = children.values[0]
+            if children.key == "maximum_grep":
+                self.maximum_grep = children.values[0]
 
     def bytesConv(self, data):
         """
