@@ -4,7 +4,7 @@
 *
 ********************
 """
-"""Python plugin for collectd to get highest CPU/Memory usage process using top command"""
+"""Python plugin for collectd to get CPU/Memory usage for processes using ps command"""
 
 # !/usr/bin/python
 import signal
@@ -26,7 +26,7 @@ SORT_BY = {'CPU': 'pcpu', 'MEM': 'pmem'}
 
 class PSStats(object):
     """Plugin object will be created only once and collects utils
-       and available CPU/RAM usage info every interval."""
+       and process related  info every interval."""
 
     def __init__(self, interval=1, num_processes='*', sort_by='CPU'):
         """Initializes interval."""
@@ -63,7 +63,7 @@ class PSStats(object):
 
     def ps_command(self):
         """
-        Returns dictionary with values of available and top SPU and memory usage summary of teh process.
+        Returns dictionary with values of available and CPU and memory usage summary of the process.
         """
         # cmnd = "top -b -o +" + self.usage_parameter +" -n 1 | head -17 | sed -n '8,20p' | awk '{print $1, $2, $9, $10, $12}'"
         if self.num_processes == '*':
@@ -123,10 +123,10 @@ class PSStats(object):
         """Validates if dictionary is not null.If null then returns None."""
         ps_stats_res = self.ps_command()
         if not ps_stats_res:
-            collectd.error("Plugin ps_stats: Unable to fetch Top Usage Summary")
+            collectd.error("Plugin ps_stats: Unable to fetch process Usage Summary")
             return None
 
-        collectd.info("Plugin ps_stats: Added ram information successfully")
+        collectd.info("Plugin ps_stats: Added usage information successfully")
         self.add_common_params(ps_stats_res)
 
         return ps_stats_res
@@ -137,7 +137,6 @@ class PSStats(object):
         collectd.debug("Plugin ps_stats: Values dispatched = " +
                        json.dumps(ps_stats_res))
         for result in ps_stats_res:
-            collectd.info("Dump : %s" % result)
             utils.dispatch(result)
 
     def read(self):
