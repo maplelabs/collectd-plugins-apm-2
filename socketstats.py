@@ -57,8 +57,10 @@ class SocketStats(object):
                 netstats_res['connProtocol'] = response[0]
                 netstats_res['recvQ'] = response[1]
                 netstats_res['sendQ'] = response[2]
-                netstats_res['localAddress'] = response[3]
-                netstats_res['foreignAddress'] = response[4]
+                netstats_res['localAddress'] = ":".join(response[3].split(":")[:-1])
+                netstats_res['localPort'] = response[3].split(":")[-1]
+                netstats_res['foreignAddress'] = ":".join(response[4].split(":")[:-1])
+                netstats_res['foreignPort'] = response[4].split(":")[-1]
                 netstats_res[PLUGINTYPE] = "netstats"
                 # os.write(1, line)
                 process_order += 1
